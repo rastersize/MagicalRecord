@@ -8,6 +8,13 @@
 
 #import "MagicalRecordHelperTests.h"
 
+
+@protocol MagicalRecordErrorHandlerProtocol <NSObject>
+
+- (void) testHandlingError:(NSError *)error;
+
+@end
+
 @implementation MagicalRecordHelperTests
 
 - (void) setUp
@@ -55,6 +62,8 @@
 
 - (void) testCreateSqliteStackWithCustomName
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
     NSString *testStoreName = @"MyTestDataStore.sqlite";
     
     NSURL *testStoreURL = [NSPersistentStore MR_urlForStoreName:testStoreName];
@@ -67,6 +76,8 @@
     NSPersistentStore *defaultStore = [NSPersistentStore MR_defaultPersistentStore];
     assertThat([defaultStore type], is(equalTo(NSSQLiteStoreType)));
     assertThat([[defaultStore URL] absoluteString], endsWith(testStoreName));
+    
+    [pool drain];
 }
 
 
@@ -99,7 +110,16 @@
 
 - (void) testLogsErrorsToLogger
 {
-    GHFail(@"Test Not Implemented");
+    NSError *testError = [NSError errorWithDomain:@"Cocoa" code:1000 userInfo:nil];
+    id mockErrorHandler = [OCMockObject mockForProtocol:@protocol(MagicalRecordErrorHandlerProtocol)];
+    [[mockErrorHandler expect] testHandlingError:testError];
+    
+    //    [[mockErrorHandler expect] performSelector:@selector(testErrorHandler:) withObject:[OCMArg any]];
+    
+    [MagicalRecordHelpers setErrorHandlerTarget:mockErrorHandler action:@selector(testHandlingError:)];
+    [MagicalRecordHelpers handleErrors:testError];
+
+    [mockErrorHandler verify];
 }
 
 @end

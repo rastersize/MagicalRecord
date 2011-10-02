@@ -22,8 +22,8 @@
 {
     [NSManagedObjectModel MR_setDefaultManagedObjectModel:[NSManagedObjectModel MR_managedObjectModelNamed:@"TestModel.momd"]];
     [MagicalRecordHelpers setupCoreDataStackWithInMemoryStore];
-    
-    id singleEntity = [FixtureHelpers dataFromPListFixtureNamed:@"SingleEntityWithNoRelationships"];
+
+    id singleEntity = [self dataFromJSONFixture];
     
     testEntity = [SingleEntityWithNoRelationships MR_importFromDictionary:singleEntity];
 }
@@ -83,19 +83,47 @@
     assertThat(testEntity.mappedStringAttribute, is(equalTo(@"Mapped value")));
 }
 
-#if TARGET_OS_IPHONE && __IPHONE_5_0 >= 50000
+- (void) testImportStringAttributeWithNullValue
+{
+    assertThat(testEntity.nullTestAttribute, is(nilValue()));
+}
+
+- (void) testImportAttributeNotInJsonData
+{
+    assertThat(testEntity.notInJsonAttribute, containsString(@"Core Data Model"));
+}
+
+#if TARGET_OS_IPHONE 
+
+#if defined(__IPHONE_5_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
 
 - (void) testImportUIColorAttributeToEntity
 {
     UIColor *actualColor = testEntity.colorTestAttribute;
-    
-    CGFloat red, blue, green, alpha;
-    [actualColor getRed:&red green:&green blue:&blue alpha:&alpha];
+ 
+    if ([actualColor respondsToSelector:@selector(getRed:green:blue:alpha:)]) 
+    {
+        CGFloat red, blue, green, alpha;
+        [actualColor getRed:&red green:&green blue:&blue alpha:&alpha];
 
-    assertThatFloat(alpha, is(equalToFloat(1.)));
-    assertThatFloat(red, is(equalToFloat(64./255.)));
-    assertThatFloat(green, is(equalToFloat(128./255.)));
-    assertThatFloat(blue, is(equalToFloat(225./255.)));
+        assertThatFloat(alpha, is(equalToFloat(1.)));
+        assertThatFloat(red, is(equalToFloat(64./255.)));
+        assertThatFloat(green, is(equalToFloat(128./255.)));
+        assertThatFloat(blue, is(equalToFloat(225./255.)));
+    }
+}
+#endif
+
+- (NSDate *) dateFromString:(NSString *)date
+{
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    formatter.dateFormat = @"MMM d, yyyy hh:mm:ss a zzz";
+//    formatter.timeZone = [NSTimeZone timeZoneWithName:@"GMT"];
+    formatter.locale = [NSLocale currentLocale];
+    
+    NSDate *expectedDate = [formatter dateFromString:date];
+
+    return expectedDate;
 }
 
 #else
@@ -110,11 +138,25 @@
     assertThatFloat(actualColor.blueComponent, is(equalToFloat(225./255.)));
 }
 
+- (NSDate *) dateFromString:(NSString *)date
+{
+    NSDate *expectedDate = [NSDate dateWithString:date];
+    return expectedDate;
+}
+
+#endif
+
 - (void) testImportDateAttributeToEntity
 {
-    NSDate *expectedDate = [NSDate dateWithString:@"Jul 23, 2011 10:30:40 PM"];
+    NSDate *expectedDate = [self dateFromString:@"Jul 23, 2011 10:30:40 PM MST"];
     assertThat(testEntity.dateTestAttribute, is(equalTo(expectedDate)));
 }
-#endif
+
+- (void) testImportDataAttributeWithCustomFormat
+{
+    NSDate *expectedDate = [self dateFromString:@"Aug 5, 2011 01:56:04 AM MDT"];
+    assertThat(testEntity.dateWithCustomFormat, is(equalTo(expectedDate)));
+    
+}
 
 @end

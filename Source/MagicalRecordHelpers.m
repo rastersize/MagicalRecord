@@ -207,15 +207,27 @@ NSString * attributeNameFromString(NSString *value)
 NSString * primaryKeyNameFromString(NSString *value)
 {
     NSString *firstCharacter = [[value substringToIndex:1] lowercaseString];
-    return [firstCharacter stringByAppendingString:[value substringFromIndex:1]];
+    return [firstCharacter stringByAppendingFormat:@"%@ID", [value substringFromIndex:1]];
 }
 
-NSDate * dateFromString(NSString *value)
+NSDate * adjustDateForDST(NSDate *date)
 {
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:kMagicalRecordImportDefaultDateFormatString];
+    NSTimeInterval dstOffset = [[NSTimeZone localTimeZone] daylightSavingTimeOffsetForDate:date];
+    NSDate *actualDate = [date dateByAddingTimeInterval:dstOffset];
+
+    return actualDate;
+}
+
+NSDate * dateFromString(NSString *value, NSString *format)
+{
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setTimeZone:[NSTimeZone localTimeZone]];
+    [formatter setLocale:[NSLocale currentLocale]];
+    [formatter setDateFormat:format];
     
-    return [formatter dateFromString:value];
+    NSDate *parsedDate = [formatter dateFromString:value];
+    
+    return parsedDate;
 }
 
 NSInteger* newColorComponentsFromString(NSString *serializedColor);
@@ -254,7 +266,7 @@ UIColor * UIColorFromString(NSString *serializedColor)
     free(componentValues);
     return color;
 }
-id (*ColorFromString)(NSString *) = UIColorFromString;
+id (*colorFromString)(NSString *) = UIColorFromString;
 
 #else
 
@@ -268,7 +280,7 @@ NSColor * NSColorFromString(NSString *serializedColor)
     free(componentValues);
     return color;
 }
-id (*ColorFromString)(NSString *) = NSColorFromString;
+id (*colorFromString)(NSString *) = NSColorFromString;
 
 
 #endif

@@ -9,8 +9,6 @@
 #define MAC_PLATFORM_ONLY YES
 #endif
 
-
-
 #ifdef NS_BLOCKS_AVAILABLE
 
 @class NSManagedObjectContext;
@@ -64,7 +62,8 @@ typedef void (^CoreDataBlock)(NSManagedObjectContext *context);
 
 
 //Helper Functions
-NSDate * dateFromString(NSString *value);
+NSDate * adjustDateForDST(NSDate *date);
+NSDate * dateFromString(NSString *value, NSString *format);
 NSString * attributeNameFromString(NSString *value);
 NSString * primaryKeyNameFromString(NSString *value);
 
@@ -77,5 +76,5 @@ UIColor * UIColorFromString(NSString *serializedColor);
 NSColor * NSColorFromString(NSString *serializedColor);
 
 #endif
-id (*ColorFromString)(NSString *);
+id (*colorFromString)(NSString *);
 

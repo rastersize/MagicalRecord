@@ -17,6 +17,9 @@
 
 
 
+
+
+
 @interface SingleEntityWithNoRelationshipsID : NSManagedObjectID {}
 @end
 
@@ -53,6 +56,14 @@
 
 
 //- (BOOL)validateDateTestAttribute:(id*)value_ error:(NSError**)error_;
+
+
+
+
+@property (nonatomic, retain) NSDate *dateWithCustomFormat;
+
+
+//- (BOOL)validateDateWithCustomFormat:(id*)value_ error:(NSError**)error_;
 
 
 
@@ -133,6 +144,26 @@
 
 
 
+@property (nonatomic, retain) NSString *notInJsonAttribute;
+
+
+//- (BOOL)validateNotInJsonAttribute:(id*)value_ error:(NSError**)error_;
+
+
+
+
+@property (nonatomic, retain) NSNumber *nullTestAttribute;
+
+
+@property long long nullTestAttributeValue;
+- (long long)nullTestAttributeValue;
+- (void)setNullTestAttributeValue:(long long)value_;
+
+//- (BOOL)validateNullTestAttribute:(id*)value_ error:(NSError**)error_;
+
+
+
+
 @property (nonatomic, retain) NSString *stringTestAttribute;
 
 
@@ -168,6 +199,12 @@
 
 - (NSDate*)primitiveDateTestAttribute;
 - (void)setPrimitiveDateTestAttribute:(NSDate*)value;
+
+
+
+
+- (NSDate*)primitiveDateWithCustomFormat;
+- (void)setPrimitiveDateWithCustomFormat:(NSDate*)value;
 
 
 
@@ -225,6 +262,21 @@
 
 - (NSString*)primitiveMappedStringAttribute;
 - (void)setPrimitiveMappedStringAttribute:(NSString*)value;
+
+
+
+
+- (NSString*)primitiveNotInJsonAttribute;
+- (void)setPrimitiveNotInJsonAttribute:(NSString*)value;
+
+
+
+
+- (NSNumber*)primitiveNullTestAttribute;
+- (void)setPrimitiveNullTestAttribute:(NSNumber*)value;
+
+- (long long)primitiveNullTestAttributeValue;
+- (void)setPrimitiveNullTestAttributeValue:(long long)value_;
 
 
 
